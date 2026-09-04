@@ -1,8 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from "next/link";
 import { MOCK_CATEGORIES, MOCK_WORKERS, Worker } from '@/lib/mockData';
 import { WorkerCard } from '@/components/WorkerCard';
+import dynamic from "next/dynamic";
+
+const WorkerMap = dynamic(() => import("@/components/WorkerMap"), { ssr: false });
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -20,6 +24,12 @@ export default function Home() {
       setSelectedWorker(worker);
     }
   };
+  const cardColors = [
+  "from-[#DCE8DD] to-[#B9CFBB]", // green
+  "from-[#F5D9C4] to-[#E8B48C]", // terracotta
+  "from-[#EFE0BE] to-[#DCC084]", // gold
+  "from-[#D9E4E0] to-[#AFC5BD]", // sage
+];
 
   const handleConfirmBooking = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +41,8 @@ export default function Home() {
   };
 
   return (
+     
+    
     <main className="min-h-screen bg-[#FDFBF7] text-stone-900 px-4 py-8 max-w-5xl mx-auto">
       {/* Header Banner */}
       <header className="mb-10 text-center">
