@@ -15,6 +15,7 @@
     "react-dom": "19.2.8",
     "react-leaflet": "^5.0.0"
   },
+<<<<<<< HEAD
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.22",
@@ -26,4 +27,22 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   }
+=======
+  "main": "verify.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kurvashi731-jpg/GigNiti.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kurvashi731-jpg/GigNiti/issues"
+  },
+  "homepage": "https://github.com/kurvashi731-jpg/GigNiti#readme"
+>>>>>>> fda2d69 (some modification in backend)
 }
