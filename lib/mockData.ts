@@ -35,6 +35,8 @@ export const MOCK_CATEGORIES: ServiceCategory[] = [
   { id: '2', name: 'Plumbing', icon: '🚰', description: 'Pipe fitting, leaks & bathroom maintenance' },
   { id: '3', name: 'Home Care', icon: '👵', description: 'Elderly care, nursing & assistance' },
   { id: '4', name: 'Carpentry', icon: '🪵', description: 'Furniture repair & custom woodwork' },
+    { id: '5', name: 'Painting', icon: '🎨', description: 'Interior & exterior wall painting' },
+  { id: '6', name: 'Cleaning', icon: '🧹', description: 'Home deep cleaning & sanitization' },
 ];
 
 export const MOCK_WORKERS: Worker[] = [
@@ -127,6 +129,20 @@ export const MOCK_WORKERS: Worker[] = [
     bio: 'Custom furniture repair and modular fittings, 8 years of experience.',
     latitude: 11.2620,
     longitude: 75.7800,
+  },
+    {
+    id: 'w7', name: 'Fathima Beevi', societyName: 'Kozhikode Painters Collective',
+    categoryName: 'Painting', ratingAvg: 4.7, experienceYears: 5, hourlyRate: 280,
+    visitCharge: 70, verified: true, jobsThisWeek: 4,
+    bio: 'Interior and exterior painting, texture finishes, waterproof coating.',
+    latitude: 11.2495, longitude: 75.7845,
+  },
+  {
+    id: 'w8', name: 'Biju Thomas', societyName: 'Malabar Home Services Cooperative',
+    categoryName: 'Cleaning', ratingAvg: 4.6, experienceYears: 3, hourlyRate: 250,
+    visitCharge: 60, verified: true, jobsThisWeek: 2,
+    bio: 'Deep cleaning, sanitization, and move-in/move-out cleaning specialist.',
+    latitude: 11.2670, longitude: 75.7760,
   },
 ];
 

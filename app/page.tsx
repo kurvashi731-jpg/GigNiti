@@ -6,17 +6,32 @@ import { MOCK_CATEGORIES, MOCK_WORKERS, Worker } from '@/lib/mockData';
 import { WorkerCard } from '@/components/WorkerCard';
 import dynamic from "next/dynamic";
 
-const WorkerMap = dynamic(() => import("@/components/WorkerMap"), { ssr: false });
+const WorkerTracker = dynamic(() => import("@/components/WorkerTracker"), { ssr: false });
+
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [search, setSearch] = useState("");
+  const [address, setAddress] = useState("");
+  const [locating, setLocating] = useState(false);
+  const [trackingWorker, setTrackingWorker] = useState<Worker | null>(null);
 
   // Filter workers based on selected category
-  const filteredWorkers = selectedCategory
-    ? MOCK_WORKERS.filter((w) => w.categoryName.toLowerCase() === selectedCategory.toLowerCase())
-    : MOCK_WORKERS;
+  const filteredWorkers = MOCK_WORKERS.filter((worker) => {
+  const matchesCategory = selectedCategory
+    ? worker.categoryName.toLowerCase() === selectedCategory.toLowerCase()
+    : true;
+
+  const matchesSearch = search
+    ? worker.name.toLowerCase().includes(search.toLowerCase()) ||
+      worker.categoryName.toLowerCase().includes(search.toLowerCase()) ||
+      worker.societyName.toLowerCase().includes(search.toLowerCase())
+    : true;
+
+  return matchesCategory && matchesSearch;
+});
 
   const handleBookClick = (workerId: string) => {
     const worker = MOCK_WORKERS.find((w) => w.id === workerId);
@@ -30,15 +45,45 @@ export default function Home() {
   "from-[#EFE0BE] to-[#DCC084]", // gold
   "from-[#D9E4E0] to-[#AFC5BD]", // sage
 ];
+  
+  const handleUseLocation = () => {
+  if (!navigator.geolocation) {
+    alert("Aapka browser location access support nahi karta.");
+    return;
+  }
 
+  setLocating(true);
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+        );
+        const data = await res.json();
+        setAddress(data.display_name || `${latitude}, ${longitude}`);
+      } catch {
+        setAddress(`${latitude}, ${longitude}`);
+      } finally {
+        setLocating(false);
+      }
+    },
+    () => {
+      alert("Location access nahi mila. Kripya browser mein location permission allow karo.");
+      setLocating(false);
+    }
+  );
+};
   const handleConfirmBooking = (e: React.FormEvent) => {
-    e.preventDefault();
-    setBookingSuccess(true);
-    setTimeout(() => {
-      setBookingSuccess(false);
-      setSelectedWorker(null);
-    }, 2500);
-  };
+  e.preventDefault();
+  setBookingSuccess(true);
+  setTimeout(() => {
+    setBookingSuccess(false);
+    setTrackingWorker(selectedWorker); // ← tracker ke liye worker set karo
+    setSelectedWorker(null); // ← booking modal band karo
+  }, 2500);
+};
 
   return (
      
@@ -64,6 +109,16 @@ export default function Home() {
         </div>
       )}
 
+      <div className="mb-6">
+  <input
+    type="text"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    placeholder="Search electrician, plumber, or society name..."
+    className="w-full text-sm border border-stone-300 rounded-xl p-3 focus:outline-none focus:border-[#C1622E]"
+  />
+</div>
+
       {/* Categories Filter */}
       <section className="mb-10">
         <div className="flex justify-between items-center mb-4">
@@ -77,9 +132,10 @@ export default function Home() {
             </button>
           )}
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {MOCK_CATEGORIES.map((cat) => {
+             <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+  {MOCK_CATEGORIES.map((cat) => {
+    
+       
             const isSelected = selectedCategory === cat.name;
             return (
               <div
@@ -159,16 +215,30 @@ export default function Home() {
                   <option>Evening (04:00 PM - 07:00 PM)</option>
                 </select>
               </div>
-
+  
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">Service Address</label>
-                <textarea
-                  rows={2}
-                  required
-                  placeholder="Enter house no, landmark, street address..."
-                  className="w-full text-sm border border-stone-300 rounded-lg p-2.5 focus:outline-none focus:border-[#C1622E]"
-                ></textarea>
-              </div>
+  <div className="flex justify-between items-center mb-1">
+    <label className="block text-xs font-semibold text-stone-600">Service Address</label>
+    <button
+      type="button"
+      onClick={handleUseLocation}
+      disabled={locating}
+      className="text-xs text-[#C1622E] font-semibold flex items-center gap-1 disabled:opacity-50"
+    >
+      📍 {locating ? "Locating..." : "Use my current location"}
+    </button>
+  </div>
+  <textarea
+    rows={2}
+    required
+    value={address}
+    onChange={(e) => setAddress(e.target.value)}
+    placeholder="Enter house no, landmark, street address..."
+    className="w-full text-sm border border-stone-300 rounded-lg p-2.5 focus:outline-none focus:border-[#C1622E]"
+  ></textarea>
+</div>
+
+              
 
               <div className="bg-stone-50 p-3 rounded-lg text-xs space-y-1 text-stone-600">
                 <div className="flex justify-between">
@@ -197,7 +267,27 @@ export default function Home() {
                   type="submit"
                   className="flex-1 py-2.5 bg-[#C1622E] text-white text-sm font-semibold rounded-lg hover:bg-[#a85223]"
                 >
+
+                  
                   Confirm Booking
+                  {trackingWorker && (
+  <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-96 bg-white rounded-2xl shadow-xl border border-stone-200 p-4 z-40">
+    <div className="flex justify-between items-center mb-2">
+      <span className="text-xs font-bold text-[#1E3B2C]">Live Tracking</span>
+      <button
+        onClick={() => setTrackingWorker(null)}
+        className="text-stone-400 hover:text-stone-600 text-lg font-bold"
+      >
+        ×
+      </button>
+    </div>
+    <WorkerTracker
+      startLat={trackingWorker.latitude}
+      startLng={trackingWorker.longitude}
+      workerName={trackingWorker.name}
+    />
+  </div>
+)}
                 </button>
               </div>
             </form>
